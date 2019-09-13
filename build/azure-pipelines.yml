@@ -48,9 +48,6 @@ stages:
       inputs:
         command: 'restore'
         projects: '**/*.csproj'
-        feedsToUse: config
-        nugetConfigPath: nuget.config # you should always have a NuGet.config file!
-        #verbosityRestore: 'detailed' # Options: quiet, minimal, normal, detailed, diagnostic
     - task: DotNetCoreCLI@2
       displayName: Build
       inputs:
