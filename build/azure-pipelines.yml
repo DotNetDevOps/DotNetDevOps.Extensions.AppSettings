@@ -21,7 +21,7 @@ pr:
 
 variables:
 - name: azure
-  value: 'azure'
+  value: 'Microsoft Partner Network (0fd7128b-5305-49da-a400-b7a37feb271c)'
 - name: functionName
   value: 'DotNetDevOps.Extensions.AppSettings.UpdateAppSettingsFunction'
 - name: storageAccount
