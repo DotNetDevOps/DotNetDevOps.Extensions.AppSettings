@@ -26,7 +26,7 @@ namespace DotNetDevOps.Extensions.AppSettings.UpdateAppSettingsFunction
     public static class UpdateAppSettingsFunction
     {
 
-        private static async Task<WebSiteManagementClient> CreateWebSiteManagementClientAsync(string subscriptionId)
+        private static async Task<WebSiteManagementClient> CreateWebSiteManagementClientAsync(ILogger logger, string subscriptionId)
         {
             var tokenProvider = new AzureServiceTokenProvider();
 
@@ -49,19 +49,22 @@ namespace DotNetDevOps.Extensions.AppSettings.UpdateAppSettingsFunction
             {
                 SubscriptionId = subscriptionId
             };
-
+            logger.LogInformation("Created WebSiteManagementClient for {SubscriptionId}", subscriptionId);
             return websiteClient;
         }
 
         [FunctionName("UpdateAppSettingsFunction")]
         public static async Task Run([QueueTrigger("%queuename%")]AppSettingUpdateModel appSettingUpdate, ILogger log)
         {
+            log.LogInformation("Processing appsetting update {data}", JToken.FromObject(appSettingUpdate).ToString());
+
             if (!string.IsNullOrWhiteSpace(appSettingUpdate.HostResourceId))
             {
-                var client = await CreateWebSiteManagementClientAsync(appSettingUpdate.HostResourceId.Trim('/').Split('/').Skip(1).FirstOrDefault());
+                var client = await CreateWebSiteManagementClientAsync(log,appSettingUpdate.HostResourceId.Trim('/').Split('/').Skip(1).FirstOrDefault());
                 var resourceGroupName = appSettingUpdate.HostResourceId.Trim('/').Split('/').Skip(3).FirstOrDefault();
                 var websiteName = appSettingUpdate.HostResourceId.Trim('/').Split('/').LastOrDefault();
 
+                log.LogInformation("Querying configuration for {resourceGroupName} and {websiteName}",resourceGroupName, websiteName);
                 var config = await client.WebApps.ListApplicationSettingsAsync(resourceGroupName,websiteName );
                 if (appSettingUpdate.Delete)
                 {
