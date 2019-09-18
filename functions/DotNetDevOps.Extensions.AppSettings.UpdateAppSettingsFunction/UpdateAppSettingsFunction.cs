@@ -58,9 +58,11 @@ namespace DotNetDevOps.Extensions.AppSettings.UpdateAppSettingsFunction
         {
             if (!string.IsNullOrWhiteSpace(appSettingUpdate.HostResourceId))
             {
-                var client = await CreateWebSiteManagementClientAsync(appSettingUpdate.HostResourceId.Split('/').Skip(1).FirstOrDefault());
+                var client = await CreateWebSiteManagementClientAsync(appSettingUpdate.HostResourceId.Trim('/').Split('/').Skip(1).FirstOrDefault());
+                var resourceGroupName = appSettingUpdate.HostResourceId.Trim('/').Split('/').Skip(3).FirstOrDefault();
+                var websiteName = appSettingUpdate.HostResourceId.Trim('/').Split('/').LastOrDefault();
 
-                var config = await client.WebApps.ListApplicationSettingsAsync(appSettingUpdate.HostResourceId.Split('/').Skip(3).FirstOrDefault(), appSettingUpdate.HostResourceId.Split('/').LastOrDefault());
+                var config = await client.WebApps.ListApplicationSettingsAsync(resourceGroupName,websiteName );
                 if (appSettingUpdate.Delete)
                 {
                     config.Properties.Remove(appSettingUpdate.Name);
@@ -70,7 +72,7 @@ namespace DotNetDevOps.Extensions.AppSettings.UpdateAppSettingsFunction
                     config.Properties[appSettingUpdate.Name] = appSettingUpdate.Value;
                 }
 
-                await client.WebApps.UpdateApplicationSettingsAsync(appSettingUpdate.HostResourceId.Split('/').Skip(3).FirstOrDefault(), appSettingUpdate.HostResourceId.Split('/').LastOrDefault(), config);
+                await client.WebApps.UpdateApplicationSettingsAsync(resourceGroupName, websiteName, config);
 
             }
 
